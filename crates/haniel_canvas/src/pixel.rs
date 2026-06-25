@@ -76,6 +76,7 @@ impl PixelBuffer {
     }
 
     /// Fill a rectangular region
+    #[allow(clippy::too_many_arguments)]
     pub fn fill_rect(&mut self, x: u32, y: u32, w: u32, h: u32, r: u8, g: u8, b: u8, a: u8) {
         let x_end = (x + w).min(self.width);
         let y_end = (y + h).min(self.height);
@@ -87,6 +88,7 @@ impl PixelBuffer {
     }
 
     /// Draw a 1px border around a rect
+    #[allow(clippy::too_many_arguments)]
     pub fn stroke_rect(&mut self, x: u32, y: u32, w: u32, h: u32, r: u8, g: u8, b: u8, a: u8) {
         if w == 0 || h == 0 { return; }
         // Top and bottom rows

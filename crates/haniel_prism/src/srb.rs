@@ -26,8 +26,8 @@ impl SrbAllocator {
     pub fn weight(&self, layout: &ComputedLayout) -> f32 {
         let center  = layout.rect.center();
         let dist    = center.distance_to(&self.fovea);
-        let max_d   = ((self.viewport_w * self.viewport_w
-            + self.viewport_h * self.viewport_h)).sqrt();
+        let max_d   = (self.viewport_w * self.viewport_w
+            + self.viewport_h * self.viewport_h).sqrt();
         let budget  = 1.0 - (dist / max_d).min(0.9);
         budget.max(0.1)
     }

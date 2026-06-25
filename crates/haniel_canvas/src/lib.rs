@@ -104,6 +104,7 @@ impl SovereignCanvas {
         buf
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn paint_dirty(
         &self,
         layout:    &ComputedLayout,
