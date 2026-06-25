@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Edison Lepiten / AIEONYX
+# SPDX-License-Identifier: Apache-2.0
+# HANIEL LUMEN — Sovereign Media Engine (video, audio, streaming)
+
+[package]
+name        = "haniel_lumen"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+axon_media.workspace = true
+axon_net.workspace = true
+axon_gpu.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+env_logger.workspace = true

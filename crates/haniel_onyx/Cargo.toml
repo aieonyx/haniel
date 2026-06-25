@@ -1,0 +1,18 @@
+# Copyright (c) 2026 Edison Lepiten / AIEONYX
+# SPDX-License-Identifier: Apache-2.0
+# HANIEL-ONYX — Sovereign On-Device AI Compute Layer
+
+[package]
+name        = "haniel_onyx"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+axon_ai_runtime.workspace = true
+axon_gpu.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+env_logger.workspace = true

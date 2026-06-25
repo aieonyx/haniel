@@ -1,0 +1,18 @@
+# Copyright (c) 2026 Edison Lepiten / AIEONYX
+# SPDX-License-Identifier: Apache-2.0
+# HANIEL SENTINEL — seL4 Formally Isolated Renderer
+
+[package]
+name        = "haniel_sentinel"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+axon_sel4.workspace = true
+axon_crypto.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+env_logger.workspace = true

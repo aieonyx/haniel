@@ -1,0 +1,18 @@
+# Copyright (c) 2026 Edison Lepiten / AIEONYX
+# SPDX-License-Identifier: Apache-2.0
+# HANIEL ECHO — Script Runtime (AxonScript + WASM, capability-gated)
+
+[package]
+name        = "haniel_echo"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+axon_wasm.workspace = true
+axon_crypto.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+env_logger.workspace = true

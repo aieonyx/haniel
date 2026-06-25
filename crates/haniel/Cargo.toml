@@ -1,0 +1,24 @@
+# Copyright (c) 2026 Edison Lepiten / AIEONYX
+# SPDX-License-Identifier: Apache-2.0
+# HANIEL — Sovereign Browser and Rendering Engine (orchestrator)
+
+[package]
+name        = "haniel"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+haniel_herald = { path = "../haniel_herald" }
+haniel_prism = { path = "../haniel_prism" }
+haniel_canvas = { path = "../haniel_canvas" }
+haniel_echo = { path = "../haniel_echo" }
+haniel_onyx = { path = "../haniel_onyx" }
+haniel_vault = { path = "../haniel_vault" }
+haniel_sentinel = { path = "../haniel_sentinel" }
+haniel_lumen = { path = "../haniel_lumen" }
+log.workspace = true
+
+[dev-dependencies]
+env_logger.workspace = true
