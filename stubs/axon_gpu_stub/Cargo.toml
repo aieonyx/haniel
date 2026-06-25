@@ -1,0 +1,6 @@
+[package]
+name = "axon_gpu"
+version = "0.0.1-stub"
+edition = "2021"
+
+[dependencies]
