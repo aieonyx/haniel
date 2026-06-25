@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // haniel_herald::arpi — ARPi sovereign identity tier resolution
 
-use crate::{ArpiTier, ThreatVerdict, ThreatReason};
+use crate::{ArpiTier, ThreatVerdict};
 use crate::threat::Sts;
 
 pub struct ArpiResolver;
@@ -45,6 +45,7 @@ impl Default for ArpiResolver {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ThreatReason;
 
     fn r() -> ArpiResolver { ArpiResolver::new() }
 

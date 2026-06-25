@@ -5,7 +5,7 @@
 use crate::{
     FetchResponse, FetchError, Protocol,
     ThreatVerdict, ThreatReason,
-};"
+};
 
 use crate::threat::Sts;
 use crate::arpi::ArpiResolver;
@@ -84,6 +84,7 @@ impl Default for HeraldFetch {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{ArpiTier, ThreatVerdict, ThreatReason, ContentType};
 
     fn f() -> HeraldFetch { HeraldFetch::new() }
 

@@ -106,19 +106,23 @@ impl Default for Sts {
     fn default() -> Self { Self::new() }
 }
 
+#[allow(clippy::needless_range_loop)]
 fn levenshtein(a: &str, b: &str) -> usize {
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
     let (m, n) = (a.len(), b.len());
     if m == 0 { return n; }
     if n == 0 { return m; }
+    // dp[i][j] = edit distance between a[..i] and b[..j]
     let mut dp = vec![vec![0usize; n + 1]; m + 1];
-    for i in 0..=m { dp[i][0] = i; }
+    for (i, row) in dp.iter_mut().enumerate() { row[0] = i; }
     for j in 0..=n { dp[0][j] = j; }
-    for (i, ca) in a.iter().enumerate().map(|(i,c)| (i+1, c)) {
-        for (j, cb) in b.iter().enumerate().map(|(j,c)| (j+1, c)) {
-            let cost = if ca == cb { 0 } else { 1 };
-            dp[i][j] = (dp[i-1][j] + 1).min(dp[i][j-1] + 1).min(dp[i-1][j-1] + cost);
+    for i in 1..=m {
+        for j in 1..=n {
+            let cost = if a[i-1] == b[j-1] { 0 } else { 1 };
+            dp[i][j] = (dp[i-1][j] + 1)
+                .min(dp[i][j-1] + 1)
+                .min(dp[i-1][j-1] + cost);
         }
     }
     dp[m][n]
