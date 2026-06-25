@@ -28,7 +28,7 @@ repository  = "https://github.com/aieonyx/haniel"
 # AXON sovereign libraries — confirmed crate names from axon workspace
 axon_net        = { path = "../axon/crates/axon_net" }
 axon_crypto     = { path = "../axon/crates/axon_crypto" }
-axon_gpu        = { path = "../axon/crates/axon_gpu" }
+axon_gpu        = { path = "../axon/crates/axon_gpu", default-features = false }
 axon_media      = { path = "../axon/crates/axon_media" }
 axon_layout     = { path = "../axon/crates/axon_layout" }
 axon_wasm       = { path = "../axon/crates/axon_wasm" }
