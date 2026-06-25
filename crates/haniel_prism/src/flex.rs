@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // haniel_prism::flex — Flexbox helpers (wraps axon_layout flex)
 
-use axon_layout::{LayoutNode, LayoutStyle, BoxModel, Direction, Align};
+use axon_layout::{LayoutNode, LayoutStyle, BoxModel, Align};
 use crate::PrismError;
 
 /// Flex container builder — creates axon_layout flex nodes

@@ -5,8 +5,7 @@
 // Uses axon_layout primitives natively
 
 use axon_layout::{
-    LayoutNode, LayoutStyle, BoxModel, EdgeSizes,
-    compute_layout, Point, Size,
+    LayoutNode, LayoutStyle, BoxModel,
 };
 use crate::{AxbwTree, AxbwNode, AxbwNodeKind, PrismError};
 

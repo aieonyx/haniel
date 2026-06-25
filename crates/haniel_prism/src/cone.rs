@@ -7,7 +7,7 @@ use axon_layout::{
     LayoutNode, LayoutStyle, BoxModel,
     ComputedLayout, Point, Size,
     TextStyle, measure_text, find_node,
-    compute_layout, Rect,
+    compute_layout,
 };
 use crate::{AxbwTree, AxbwNodeKind, PrismError};
 
