@@ -10,7 +10,7 @@ pub mod gpu;
 pub mod paint;
 pub mod surface;
 
-use crate::haniel_prism::{LayoutTree, NodeId};
+// LayoutTree and u32 imported from haniel_prism at HE-6
 
 /// Pixel buffer — RGBA8
 #[derive(Debug)]
@@ -49,8 +49,8 @@ pub enum RasterBackend {
 
 /// CANVAS sovereign rasterizer trait
 pub trait Canvas: Send + Sync {
-    fn paint(&self, tree: &LayoutTree) -> Result<PixelBuffer, CanvasError>;
-    fn repaint(&self, tree: &LayoutTree, dirty: &[NodeId]) -> Result<PixelBuffer, CanvasError>;
+    fn paint(&self) -> Result<PixelBuffer, CanvasError>;
+    fn repaint(&self, dirty: &[u32]) -> Result<PixelBuffer, CanvasError>;
     fn set_backend(&mut self, backend: RasterBackend);
     fn gpu_memory_used(&self) -> usize;
 }

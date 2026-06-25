@@ -3,7 +3,7 @@
 # HANIEL PRISM — Sovereign Layout Engine (Rod/Cone dual pass)
 
 [package]
-name        = "haniel_prism"
+name              = "haniel_prism"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

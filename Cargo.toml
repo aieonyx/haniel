@@ -25,7 +25,7 @@ license     = "Apache-2.0"
 repository  = "https://github.com/aieonyx/haniel"
 
 [workspace.dependencies]
-# AXON sovereign libraries — all P56-P63 complete
+# AXON sovereign libraries — confirmed crate names from axon workspace
 axon_net        = { path = "../axon/crates/axon_net" }
 axon_crypto     = { path = "../axon/crates/axon_crypto" }
 axon_gpu        = { path = "../axon/crates/axon_gpu" }
@@ -34,12 +34,8 @@ axon_layout     = { path = "../axon/crates/axon_layout" }
 axon_wasm       = { path = "../axon/crates/axon_wasm" }
 axon_font       = { path = "../axon/crates/axon_font" }
 axon_ai_runtime = { path = "../axon/crates/axon_ai_runtime" }
-axon_sel4       = { path = "../axon/crates/axon_sel4" }
-axon_std_io     = { path = "../axon/crates/axon_std_io" }
+axon_runtime    = { path = "../axon/crates/axon_runtime" }
 
-# Minimal Rust scaffolding (workspace coordination only)
-serde       = { version = "1.0", features = ["derive"] }
-serde_json  = { version = "1.0" }
-tokio       = { version = "1", features = ["full"] }
+# Minimal Rust coordination layer
 log         = "0.4"
 env_logger  = "0.11"

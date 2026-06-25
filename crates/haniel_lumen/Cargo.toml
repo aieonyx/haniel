@@ -3,7 +3,7 @@
 # HANIEL LUMEN — Sovereign Media Engine (video, audio, streaming)
 
 [package]
-name        = "haniel_lumen"
+name              = "haniel_lumen"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -3,7 +3,7 @@
 # HANIEL-ONYX — Sovereign On-Device AI Compute Layer
 
 [package]
-name        = "haniel_onyx"
+name              = "haniel_onyx"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -10,7 +10,7 @@ pub mod dom;
 pub mod runner;
 pub mod sandbox;
 
-use crate::haniel_prism::NodeId;
+// u32 wired at HE-9
 
 /// ARPi capability token
 #[derive(Debug, Clone)]
@@ -41,10 +41,10 @@ pub enum ScriptSource {
 /// DOM mutation produced by script
 #[derive(Debug, Clone)]
 pub enum DomMutation {
-    SetText   { node: NodeId, text: String },
-    SetStyle  { node: NodeId, property: String, value: String },
-    AppendChild { parent: NodeId, child: NodeId },
-    RemoveNode  { node: NodeId },
+    SetText   { node: u32, text: String },
+    SetStyle  { node: u32, property: String, value: String },
+    AppendChild { parent: u32, child: u32 },
+    RemoveNode  { node: u32 },
 }
 
 /// Script execution result

@@ -3,7 +3,7 @@
 # HANIEL VAULT — Sovereign Memory Manager and Cache
 
 [package]
-name        = "haniel_vault"
+name              = "haniel_vault"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -11,7 +11,7 @@ license.workspace = true
 
 [dependencies]
 axon_crypto.workspace = true
-axon_std_io.workspace = true
+axon_runtime.workspace = true
 log.workspace = true
 
 [dev-dependencies]

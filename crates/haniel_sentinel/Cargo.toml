@@ -3,14 +3,14 @@
 # HANIEL SENTINEL — seL4 Formally Isolated Renderer
 
 [package]
-name        = "haniel_sentinel"
+name              = "haniel_sentinel"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
 [dependencies]
-axon_sel4.workspace = true
+axon_runtime.workspace = true
 axon_crypto.workspace = true
 log.workspace = true
 

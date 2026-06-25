@@ -3,7 +3,7 @@
 # HANIEL ECHO — Script Runtime (AxonScript + WASM, capability-gated)
 
 [package]
-name        = "haniel_echo"
+name              = "haniel_echo"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

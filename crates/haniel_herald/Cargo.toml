@@ -3,7 +3,7 @@
 # HANIEL HERALD — Network, Protocol, STS Threat Gate, ARPi
 
 [package]
-name        = "haniel_herald"
+name              = "haniel_herald"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

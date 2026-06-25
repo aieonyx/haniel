@@ -10,7 +10,7 @@ pub mod infer;
 pub mod hints;
 pub mod threat;
 
-use crate::haniel_prism::{LayoutTree, NodeId};
+// LayoutTree and u32 wired at HE-11
 
 /// Semantic content classification
 #[derive(Debug, Clone, PartialEq)]
@@ -27,7 +27,7 @@ pub enum SemanticClass {
 /// Render hint for a node
 #[derive(Debug, Clone)]
 pub struct RenderHint {
-    pub node: NodeId,
+    pub node: u32,
     pub class: SemanticClass,
     pub priority: f32,
     pub ai_confidence: f32,
@@ -60,9 +60,9 @@ pub struct InferenceResult {
 
 /// HANIEL-ONYX AI compute trait
 pub trait IrisOnyx: Send + Sync {
-    fn classify(&self, tree: &LayoutTree) -> Result<Vec<RenderHint>, OnyxError>;
+    fn classify(&self) -> Result<Vec<RenderHint>, OnyxError>;
     fn infer(&self, request: InferenceRequest) -> Result<InferenceResult, OnyxError>;
-    fn render_hints(&self, tree: &LayoutTree) -> Result<Vec<RenderHint>, OnyxError>;
+    fn render_hints(&self) -> Result<Vec<RenderHint>, OnyxError>;
     fn threat_classify(&self, content: &str) -> SemanticClass;
     fn model_memory_used(&self) -> usize;
 }

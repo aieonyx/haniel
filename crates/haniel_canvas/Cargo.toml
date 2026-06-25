@@ -3,7 +3,7 @@
 # HANIEL CANVAS — Sovereign Rasterizer and GPU Renderer
 
 [package]
-name        = "haniel_canvas"
+name              = "haniel_canvas"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

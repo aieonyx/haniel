@@ -3,7 +3,7 @@
 # HANIEL — Sovereign Browser and Rendering Engine (orchestrator)
 
 [package]
-name        = "haniel"
+name              = "haniel"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
