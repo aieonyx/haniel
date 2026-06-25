@@ -1,15 +1,19 @@
 // Copyright (c) 2026 Edison Lepiten / AIEONYX
 // SPDX-License-Identifier: Apache-2.0
 // HANIEL HERALD — Network, Protocol, STS Threat Gate, ARPi
-// HE-3 implementation target
+// HE-3 implementation
 
 #![forbid(unsafe_code)]
 
-pub mod fetch;
-pub mod threat;
 pub mod arpi;
-pub mod protocol;
+pub mod fetch;
 pub mod header;
+pub mod protocol;
+pub mod threat;
+
+pub use fetch::HeraldFetch;
+pub use threat::Sts;
+pub use arpi::ArpiResolver;
 
 /// Protocol detected from URI scheme
 #[derive(Debug, Clone, PartialEq)]
@@ -46,21 +50,13 @@ pub enum ArpiTier {
     Hostile,
 }
 
-/// Outgoing fetch request
-#[derive(Debug, Clone)]
-pub struct FetchRequest {
-    pub uri: String,
-    pub protocol: Protocol,
-    pub arpi_tier: ArpiTier,
-}
-
-/// Incoming fetch response
+/// Fetch response
 #[derive(Debug)]
 pub struct FetchResponse {
-    pub body: Vec<u8>,
-    pub content_type: ContentType,
+    pub body:           Vec<u8>,
+    pub content_type:   ContentType,
     pub threat_verdict: ThreatVerdict,
-    pub arpi_tier: ArpiTier,
+    pub arpi_tier:      ArpiTier,
 }
 
 /// Content type classification
@@ -80,22 +76,40 @@ pub enum AssetKind {
     Script,
 }
 
-/// HERALD sovereign fetch trait
-pub trait Herald: Send + Sync {
-    fn fetch(&self, uri: &str) -> Result<FetchResponse, HeraldError>;
-    fn threat_gate(&self, uri: &str) -> ThreatVerdict;
-    fn resolve_arpi(&self, origin: &str) -> ArpiTier;
-    fn detect_protocol(&self, uri: &str) -> Protocol;
-    fn axon_client_header(&self) -> String;
-}
-
-/// HERALD error type
+/// Fetch error
 #[derive(Debug)]
-pub enum HeraldError {
+pub enum FetchError {
     Blocked(ThreatReason),
     NetworkFailure(String),
     InvalidUri(String),
     Timeout,
+}
+
+/// HERALD sovereign fetch trait
+pub trait Herald: Send + Sync {
+    fn fetch(&self, uri: &str) -> Result<FetchResponse, FetchError>;
+    fn threat_gate(&self, uri: &str) -> ThreatVerdict;
+    fn resolve_arpi(&self, uri: &str) -> ArpiTier;
+    fn axon_client_header(&self, tier: &ArpiTier) -> String;
+}
+
+impl Herald for HeraldFetch {
+    fn fetch(&self, uri: &str) -> Result<FetchResponse, FetchError> {
+        self.fetch(uri)
+    }
+
+    fn threat_gate(&self, uri: &str) -> ThreatVerdict {
+        self.sts.classify(uri)
+    }
+
+    fn resolve_arpi(&self, uri: &str) -> ArpiTier {
+        let threat = self.sts.classify(uri);
+        self.resolver.resolve(uri, &threat)
+    }
+
+    fn axon_client_header(&self, tier: &ArpiTier) -> String {
+        ArpiResolver::axon_client_header(tier)
+    }
 }
 
 #[cfg(test)]
@@ -103,23 +117,44 @@ mod tests {
     use super::*;
 
     #[test]
-    fn protocol_awp_detected() {
-        // HE-3 implementation will make this pass
-        let uri = "awp://aegis";
-        assert!(uri.starts_with("awp://"));
+    fn herald_fetch_awp_aegis() {
+        let h = HeraldFetch::new();
+        let r = Herald::fetch(&h, "awp://aegis").unwrap();
+        assert_eq!(r.arpi_tier, ArpiTier::Sovereign);
     }
 
     #[test]
-    fn arpi_tier_variants_exist() {
-        let _s = ArpiTier::Sovereign;
-        let _v = ArpiTier::Verified;
-        let _g = ArpiTier::Guarded;
-        let _h = ArpiTier::Hostile;
+    fn herald_threat_gate_tracker() {
+        let h = HeraldFetch::new();
+        assert!(matches!(
+            Herald::threat_gate(&h, "https://doubleclick.net/"),
+            ThreatVerdict::Blocked(ThreatReason::TrackerDomain)
+        ));
     }
 
     #[test]
-    fn threat_verdict_variants_exist() {
-        let _c = ThreatVerdict::Clean;
-        let _b = ThreatVerdict::Blocked(ThreatReason::TrackerDomain);
+    fn herald_resolve_arpi_awp() {
+        let h = HeraldFetch::new();
+        assert_eq!(
+            Herald::resolve_arpi(&h, "awp://home"),
+            ArpiTier::Sovereign
+        );
+    }
+
+    #[test]
+    fn herald_resolve_arpi_https() {
+        let h = HeraldFetch::new();
+        assert_eq!(
+            Herald::resolve_arpi(&h, "https://example.com"),
+            ArpiTier::Verified
+        );
+    }
+
+    #[test]
+    fn herald_axon_client_header_contains_haniel() {
+        let h = HeraldFetch::new();
+        let header = Herald::axon_client_header(&h, &ArpiTier::Sovereign);
+        assert!(header.contains("HANIEL"));
+        assert!(header.contains("AIEONYX"));
     }
 }
