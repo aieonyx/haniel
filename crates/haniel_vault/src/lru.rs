@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 
 /// LRU cache node
+#[allow(dead_code)]
 struct LruNode {
     key:   String,
     value: Vec<u8>,

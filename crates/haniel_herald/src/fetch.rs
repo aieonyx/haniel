@@ -3,9 +3,10 @@
 // haniel_herald::fetch — Sovereign resource fetch pipeline
 
 use crate::{
-    FetchResponse, FetchError, Protocol, ContentType,
-    ThreatVerdict, ThreatReason, ArpiTier,
-};
+    FetchResponse, FetchError, Protocol,
+    ThreatVerdict, ThreatReason,
+};"
+
 use crate::threat::Sts;
 use crate::arpi::ArpiResolver;
 use crate::protocol::{detect, detect_content_type};
