@@ -176,7 +176,7 @@ pub fn axbw_to_layout_node(
     };
 
     let model = BoxModel::default_with_content(vw, vh)
-        .map_err(|e| PrismError::LayoutOverflow)?;
+        .map_err(|_| PrismError::LayoutOverflow)?;
 
     let mut layout_node = LayoutNode::new(
         &format!("{}", node_id),

@@ -7,10 +7,9 @@ use axon_layout::{
     LayoutNode, LayoutStyle, BoxModel,
     ComputedLayout, Point, Size,
     TextStyle, measure_text, find_node,
-    compute_layout,
+    compute_layout, Rect,
 };
 use crate::{AxbwTree, AxbwNodeKind, PrismError};
-use crate::axbw::axbw_to_layout_node;
 
 /// Cone pass — full detail layout
 /// Refines rod pass with real text metrics and asset dimensions
@@ -31,7 +30,7 @@ impl ConeLayout {
         let available = Size::new(vw, vh)
             .map_err(|_| PrismError::LayoutOverflow)?;
         compute_layout(&root_node, origin, available)
-            .map_err(|e| PrismError::InvalidAxbw(format!("cone layout error: {:?}", e)))
+            .map_err(|e| PrismError::InvalidAxbw(format!("cone layout error: {e:?}")))
     }
 
     /// Build layout node with cone-pass metrics (real text heights)
@@ -62,7 +61,7 @@ impl ConeLayout {
                 (metrics.width.max(1.0), metrics.height.max(ts.line_height))
             }
             AxbwNodeKind::Image { aspect, .. } => {
-                let img_h = if *aspect > 0.0 { vw / aspect } else { vw * 0.5625 };
+                let img_h = if *aspect > 0.0 { vw / *aspect } else { vw * 0.5625 };
                 (vw, img_h)
             }
             AxbwNodeKind::Sovereign => (vw, vh),

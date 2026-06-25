@@ -164,7 +164,7 @@ impl HtmlParser {
                     // Push placeholder — filled when tag closes
                     nodes.push((id, kind, Vec::new()));
                 }
-                HtmlToken::CloseTag { name } => {
+                HtmlToken::CloseTag { name: _ } => {
                     if let Some((closed_id, children)) = stack.pop() {
                         // Update children in nodes
                         if let Some(entry) = nodes.iter_mut().find(|(id,_,_)| *id == closed_id) {

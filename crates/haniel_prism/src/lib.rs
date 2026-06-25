@@ -25,8 +25,7 @@ pub use text::TextLayout;
 // Re-export axon_layout types used throughout HANIEL
 pub use axon_layout::{
     LayoutNode, LayoutStyle, ComputedLayout,
-    BoxModel, EdgeSizes, Point, Rect, Size,
-    Direction, Align, compute_layout, find_node,
+    Rect, Align, find_node,
     TextStyle, TextMetrics, measure_text, break_lines,
 };
 
