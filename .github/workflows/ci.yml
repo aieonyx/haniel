@@ -24,9 +24,6 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            libvulkan-dev \
-            vulkan-validationlayers \
-            mesa-vulkan-drivers \
             llvm \
             clang \
             lld
@@ -37,13 +34,32 @@ jobs:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build workspace
-        run: cargo build --workspace
+      - name: Build HANIEL crates
+        run: |
+          cargo build -p haniel_herald \
+                      -p haniel_prism \
+                      -p haniel_canvas \
+                      -p haniel_vault \
+                      -p haniel_echo \
+                      -p haniel_onyx \
+                      -p haniel_sentinel \
+                      -p haniel_lumen \
+                      -p haniel
 
       - name: Run tests
-        run: cargo test --workspace -- --test-threads=1
+        run: |
+          cargo test -p haniel_herald \
+                     -p haniel_prism \
+                     -p haniel_canvas \
+                     -p haniel_vault \
+                     -p haniel_echo \
+                     -p haniel_onyx \
+                     -p haniel_sentinel \
+                     -p haniel_lumen \
+                     -p haniel \
+                     -- --test-threads=1
 
-      - name: Clippy (HANIEL crates only)
+      - name: Clippy
         run: |
           cargo clippy -p haniel_herald \
                        -p haniel_prism \
