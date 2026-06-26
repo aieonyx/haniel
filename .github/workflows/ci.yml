@@ -69,8 +69,11 @@ jobs:
                      -- --test-threads=1
 
       - name: Clippy
+        env:
+          CARGO_ENCODED_RUSTFLAGS: ""
         run: |
-          cargo clippy -p haniel_herald \
+          cargo clippy --no-deps \
+                       -p haniel_herald \
                        -p haniel_prism \
                        -p haniel_canvas \
                        -p haniel_vault \
