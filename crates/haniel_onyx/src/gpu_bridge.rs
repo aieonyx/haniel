@@ -3,7 +3,7 @@
 // haniel_onyx::gpu_bridge — axon_gpu integration for AI inference
 // Bridges GpuDevice/GpuKernel to HANIEL-ONYX compute pipeline
 
-use axon_gpu::{GpuDevice, GpuKernel, GpuBuffer, BufferKind, KernelOp, GpuBackend};
+use axon_gpu::{GpuDevice, GpuKernel, GpuBuffer, BufferKind, KernelOp};
 use crate::OnyxError;
 
 /// Sovereign GPU compute bridge for HANIEL-ONYX

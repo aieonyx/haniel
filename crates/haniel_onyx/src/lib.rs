@@ -14,7 +14,6 @@ pub mod threat;
 
 pub use gpu_bridge::OnxGpuBridge;
 
-use haniel_prism::ComputedLayout;
 
 /// Semantic content classification
 #[derive(Debug, Clone, PartialEq)]
