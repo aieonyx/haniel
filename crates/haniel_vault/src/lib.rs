@@ -11,7 +11,7 @@ pub mod memory;
 pub mod lru;
 
 pub use memory::MemorySnapshot;
-pub use font::FontCache;
+pub use font::{FontCache, SovereignFontEngine};
 
 use std::sync::{Arc, Mutex};
 use cache::HotCache;
@@ -91,9 +91,10 @@ impl SovereignVault {
     /// Create a new VAULT with given memory limit
     pub fn new(limit_bytes: usize) -> Self {
         Self {
-            hot:     Arc::new(HotCache::new(limit_bytes)),
-            tracker: MemoryTracker::new(limit_bytes),
-            fonts:   Mutex::new(FontCache::new()),
+            hot:         Arc::new(HotCache::new(limit_bytes)),
+            tracker:     MemoryTracker::new(limit_bytes),
+            fonts:       Mutex::new(FontCache::new()),
+            font_engine: SovereignFontEngine::new(),
         }
     }
 

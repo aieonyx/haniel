@@ -12,6 +12,7 @@ license.workspace = true
 [dependencies]
 axon_crypto.workspace = true
 axon_runtime.workspace = true
+axon_font.workspace   = true
 log.workspace = true
 
 [dev-dependencies]

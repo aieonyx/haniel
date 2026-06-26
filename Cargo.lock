@@ -611,6 +611,7 @@ name = "haniel_vault"
 version = "0.1.0"
 dependencies = [
  "axon_crypto",
+ "axon_font",
  "axon_runtime",
  "env_logger",
  "log",

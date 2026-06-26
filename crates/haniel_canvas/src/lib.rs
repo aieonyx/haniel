@@ -16,8 +16,10 @@ pub use paint::{Color, PaintCommand, DisplayList};
 pub use pixel::PixelBuffer;
 pub use raster::SoftwareRasterizer;
 pub use surface::{CanvasSurface, SurfaceBackend, SurfaceError};
+pub use text_render::TextRenderer;
 
 use axon_layout::ComputedLayout;
+use text_render::TextRenderer;
 
 /// Raster backend selector
 #[derive(Debug, Clone, PartialEq)]
@@ -39,6 +41,7 @@ pub enum CanvasError {
 pub struct SovereignCanvas {
     pub backend:    RasterBackend,
     pub rasterizer: SoftwareRasterizer,
+    pub text:       TextRenderer,
     pub width:      u32,
     pub height:     u32,
 }
@@ -48,6 +51,7 @@ impl SovereignCanvas {
         Self {
             backend:    RasterBackend::Software,
             rasterizer: SoftwareRasterizer::new(),
+            text:       TextRenderer::new(),
             width,
             height,
         }
