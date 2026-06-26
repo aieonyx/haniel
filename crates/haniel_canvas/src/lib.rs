@@ -6,6 +6,7 @@
 #![forbid(unsafe_code)]
 
 pub mod gpu;
+pub use gpu::GpuCanvas;
 pub mod paint;
 pub mod pixel;
 pub mod raster;

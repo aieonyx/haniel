@@ -13,7 +13,12 @@ license.workspace = true
 axon_gpu.workspace = true
 axon_font.workspace = true
 axon_layout.workspace = true
+wgpu = { version = "22", optional = true }
 log.workspace = true
+
+[features]
+default = []
+gpu = ["wgpu"]
 
 [dev-dependencies]
 env_logger.workspace = true
