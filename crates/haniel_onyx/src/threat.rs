@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // haniel_onyx::threat — AI-powered threat content classifier
 
-use axon_ai_runtime::Tensor;
 use crate::SemanticClass;
 
 /// Threat classifier — detects hostile AI-generated content
@@ -22,6 +21,7 @@ impl ThreatClassifier {
     }
 
     /// Compute threat score 0.0-1.0
+    /// Each hostile keyword hit = 0.2, capped at 1.0
     pub fn threat_score(&self, content: &str) -> f32 {
         let lower = content.to_lowercase();
         let hostile_keywords = [
@@ -34,34 +34,7 @@ impl ThreatClassifier {
         for kw in &hostile_keywords {
             if lower.contains(kw) { hits += 1; }
         }
-        // Each keyword hit = 0.2, capped at 1.0
         (hits as f32 * 0.2).min(1.0)
-    }
-
-    /// Extract threat-specific features
-    fn extract_features(&self, content: &str) -> Tensor {
-        let lower = content.to_lowercase();
-
-        let hostile_keywords = [
-            "connect wallet", "verify account", "claim reward",
-            "limited time", "act now", "you have been selected",
-            "send crypto", "seed phrase", "private key",
-            "urgent action", "account suspended", "winner",
-        ];
-
-        let mut score = 0.0f32;
-        for kw in &hostile_keywords {
-            if lower.contains(kw) { score += 1.0; }
-        }
-
-        let features = vec![
-            score / hostile_keywords.len() as f32,
-            if lower.contains("!") { 0.3 } else { 0.0 },
-            if lower.contains("free") && lower.contains("now") { 0.5 } else { 0.0 },
-            if lower.contains("verify") { 0.3 } else { 0.0 },
-        ];
-
-        Tensor::from_vec(features).unwrap_or_else(|_| Tensor::zeros(vec![4]).unwrap())
     }
 }
 
@@ -87,7 +60,6 @@ mod tests {
     #[test]
     fn classify_clean_article() {
         let c = clf();
-        // Clean content should not be classified as threat
         let result = c.classify("This is a regular news article about technology.");
         assert_ne!(result, SemanticClass::Threat);
     }
@@ -104,12 +76,5 @@ mod tests {
         let c     = clf();
         let score = c.threat_score("A thoughtful article about distributed systems.");
         assert!(score <= 0.3, "clean content score should be low");
-    }
-
-    #[test]
-    fn features_correct_dimension() {
-        let c = clf();
-        let f = c.extract_features("test content");
-        assert_eq!(f.numel(), 4);
     }
 }
