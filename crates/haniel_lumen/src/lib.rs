@@ -1,16 +1,26 @@
 // Copyright (c) 2026 Edison Lepiten / AIEONYX
 // SPDX-License-Identifier: Apache-2.0
 // HANIEL LUMEN — Sovereign Media Engine
-// HE-10 implementation target
+// HE-10: axon_media wired — video frames, PCM audio, DRM sovereignty
 
 #![forbid(unsafe_code)]
 
-pub mod demux;
-pub mod codec;
-pub mod stream;
 pub mod abr;
-pub mod drm;
 pub mod audio;
+pub mod codec;
+pub mod demux;
+pub mod drm;
+pub mod session;
+pub mod stream;
+pub mod video;
+
+pub use audio::AudioPipeline;
+pub use codec::{detect_video_codec, detect_audio_codec};
+pub use drm::{DrmResolver, DrmVerdict, SovereigntyNotice};
+pub use session::{MediaSession, MediaStats, SessionState, SessionIdGen};
+pub use stream::{StreamManifest, StreamQuality};
+pub use abr::AbrController;
+pub use video::{SovereignVideoFrame, FrameBuffer};
 
 /// Media source descriptor
 #[derive(Debug, Clone)]
@@ -57,47 +67,6 @@ pub enum DrmMode {
     Blocked,
 }
 
-/// Active media session
-#[derive(Debug)]
-pub struct MediaSession {
-    pub id: u64,
-    pub source: MediaSource,
-    pub video_codec: VideoCodec,
-    pub audio_codec: AudioCodec,
-    pub drm: DrmMode,
-    pub width: u32,
-    pub height: u32,
-    pub framerate: f32,
-    pub hardware_decode: bool,
-}
-
-/// Decoded video frame
-#[derive(Debug)]
-pub struct VideoFrame {
-    pub pts: u64,
-    pub data: Vec<u8>,
-    pub width: u32,
-    pub height: u32,
-}
-
-/// Media playback stats
-#[derive(Debug, Default)]
-pub struct MediaStats {
-    pub frames_decoded: u64,
-    pub frames_dropped: u64,
-    pub buffer_ms: u64,
-    pub bitrate_bps: u64,
-}
-
-/// LUMEN sovereign media trait
-pub trait Lumen: Send + Sync {
-    fn open(&self, source: MediaSource) -> Result<MediaSession, LumenError>;
-    fn next_frame(&self, session: &MediaSession) -> Result<VideoFrame, LumenError>;
-    fn select_quality(&self, session: &MediaSession, bandwidth_bps: u64) -> Result<u32, LumenError>;
-    fn stats(&self, session_id: u64) -> MediaStats;
-    fn close(&self, session: MediaSession);
-}
-
 /// LUMEN error type
 #[derive(Debug)]
 pub enum LumenError {
@@ -108,44 +77,140 @@ pub enum LumenError {
     EndOfStream,
 }
 
+/// LUMEN sovereign media trait
+pub trait Lumen: Send + Sync {
+    fn open(&self, source: MediaSource) -> Result<MediaSession, LumenError>;
+    fn stats(&self, session_id: u64) -> MediaStats;
+}
+
+/// Sovereign LUMEN implementation
+pub struct SovereignLumen {
+    drm:  DrmResolver,
+    abr:  AbrController,
+    id_gen: std::sync::Mutex<SessionIdGen>,
+}
+
+impl SovereignLumen {
+    pub fn new() -> Self {
+        Self {
+            drm:    DrmResolver::new(),
+            abr:    AbrController::new(),
+            id_gen: std::sync::Mutex::new(SessionIdGen::new()),
+        }
+    }
+
+    /// Check if a source can be played
+    pub fn can_play(&self, drm: &DrmMode) -> bool {
+        self.drm.can_play(drm)
+    }
+
+    /// Get sovereignty notice for DRM content
+    pub fn sovereignty_notice(&self, drm: &DrmMode) -> Option<SovereigntyNotice> {
+        self.drm.notice(drm)
+    }
+
+    /// Select stream quality for bandwidth
+    pub fn select_quality<'a>(
+        &self,
+        manifest:      &'a StreamManifest,
+        bandwidth_bps: u64,
+    ) -> Option<&'a StreamQuality> {
+        self.abr.select(manifest, bandwidth_bps)
+    }
+}
+
+impl Default for SovereignLumen {
+    fn default() -> Self { Self::new() }
+}
+
+impl Lumen for SovereignLumen {
+    fn open(&self, source: MediaSource) -> Result<MediaSession, LumenError> {
+        let id = self.id_gen.lock().unwrap().generate();
+        Ok(MediaSession::new(id, source))
+    }
+
+    fn stats(&self, _session_id: u64) -> MediaStats {
+        MediaStats::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn lumen() -> SovereignLumen { SovereignLumen::new() }
+
     #[test]
-    fn video_codec_av1_is_primary() {
-        // AV1 is our sovereign-first codec — royalty-free
-        let codec = VideoCodec::Av1;
-        assert_eq!(codec, VideoCodec::Av1);
+    fn lumen_open_url_session() {
+        let l = lumen();
+        let s = l.open(MediaSource::Url("https://example.com/video.mp4".into())).unwrap();
+        assert_eq!(s.id, 1);
     }
 
     #[test]
-    fn audio_codec_opus_is_primary() {
-        // Opus is our sovereign-first audio codec
-        let codec = AudioCodec::Opus;
-        assert_eq!(codec, AudioCodec::Opus);
+    fn lumen_open_awp_stream() {
+        let l = lumen();
+        let s = l.open(MediaSource::AwpStream("awp://media/test".into())).unwrap();
+        assert_eq!(s.id, 1);
     }
 
     #[test]
-    fn drm_mode_blocked_for_hostile_drm() {
-        let drm = DrmMode::Blocked;
-        assert_eq!(drm, DrmMode::Blocked);
+    fn lumen_session_ids_increment() {
+        let l  = lumen();
+        let s1 = l.open(MediaSource::Url("a".into())).unwrap();
+        let s2 = l.open(MediaSource::Url("b".into())).unwrap();
+        assert_eq!(s1.id, 1);
+        assert_eq!(s2.id, 2);
     }
 
     #[test]
-    fn stream_protocol_variants_exist() {
-        let protocols = vec![
-            StreamProtocol::Hls,
-            StreamProtocol::Dash,
-            StreamProtocol::Awp,
-        ];
-        assert_eq!(protocols.len(), 3);
+    fn lumen_open_content_can_play() {
+        let l = lumen();
+        assert!(l.can_play(&DrmMode::None));
     }
 
     #[test]
-    fn media_stats_default_zero() {
-        let stats = MediaStats::default();
-        assert_eq!(stats.frames_decoded, 0);
-        assert_eq!(stats.frames_dropped, 0);
+    fn lumen_drm_content_blocked() {
+        let l = lumen();
+        assert!(!l.can_play(&DrmMode::CompatibilityShim));
+    }
+
+    #[test]
+    fn lumen_sovereignty_notice_for_drm() {
+        let l      = lumen();
+        let notice = l.sovereignty_notice(&DrmMode::CompatibilityShim);
+        assert!(notice.is_some());
+    }
+
+    #[test]
+    fn lumen_no_notice_for_open_content() {
+        let l = lumen();
+        assert!(l.sovereignty_notice(&DrmMode::None).is_none());
+    }
+
+    #[test]
+    fn lumen_abr_selects_quality() {
+        let l = lumen();
+        let mut m = StreamManifest::new(StreamProtocol::Hls, "stream.m3u8");
+        m.add_quality(StreamQuality { bitrate_bps: 500_000, width: 854, height: 480, url: "480p".into() });
+        m.add_quality(StreamQuality { bitrate_bps: 2_000_000, width: 1280, height: 720, url: "720p".into() });
+        let q = l.select_quality(&m, 1_000_000).unwrap();
+        assert_eq!(q.height, 480);
+    }
+
+    #[test]
+    fn video_codec_variants_exist() {
+        let _ = VideoCodec::Av1;
+        let _ = VideoCodec::Vp9;
+        let _ = VideoCodec::H264;
+        let _ = VideoCodec::Hevc;
+    }
+
+    #[test]
+    fn audio_codec_variants_exist() {
+        let _ = AudioCodec::Opus;
+        let _ = AudioCodec::Aac;
+        let _ = AudioCodec::Flac;
+        let _ = AudioCodec::Vorbis;
     }
 }
