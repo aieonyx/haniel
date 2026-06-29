@@ -3,7 +3,7 @@
 // haniel_vault::font — Sovereign font engine
 // HE-8: axon_font integration — real glyph rendering replaces placeholder
 
-use axon_font::{TextRaster, RasterConfig, Font, FontResult};
+use axon_font::{TextRaster, RasterConfig, Font};
 use crate::VaultError;
 
 /// Sovereign font engine — wraps axon_font TextRaster
@@ -29,11 +29,7 @@ impl SovereignFontEngine {
         bg:    [u8; 4],
     ) -> Result<(Vec<u8>, usize, usize), VaultError> {
         // Build a custom config with the given colors
-        let config = RasterConfig {
-            fg_color: fg,
-            bg_color: bg,
-            scale:    1,
-        };
+        let config = RasterConfig { fg, bg, scale: 1 };
         let raster = TextRaster::new(Font::builtin(), config);
         raster.raster_line(text)
             .map_err(|e| VaultError::SerializationError(format!("font render: {:?}", e)))
@@ -164,4 +160,39 @@ mod tests {
         assert!(pixels.iter().any(|&b| b > 0),
             "rendered text should have non-zero pixels");
     }
+}
+
+/// Cached font entry — raw font data keyed by family + weight
+#[derive(Debug, Clone)]
+pub struct FontEntry {
+    pub family: String,
+    pub weight: u16,
+    pub data:   Vec<u8>,
+}
+
+/// Font cache — keyed by family + weight
+pub struct FontCache {
+    entries: std::collections::HashMap<String, FontEntry>,
+}
+
+impl FontCache {
+    pub fn new() -> Self {
+        Self { entries: std::collections::HashMap::new() }
+    }
+    pub fn store(&mut self, family: &str, weight: u16, data: Vec<u8>) {
+        let key = format!("{}:{}", family, weight);
+        self.entries.insert(key, FontEntry {
+            family: family.to_string(), weight, data,
+        });
+    }
+    pub fn get(&self, family: &str, weight: u16) -> Option<&FontEntry> {
+        let key = format!("{}:{}", family, weight);
+        self.entries.get(&key)
+    }
+    pub fn len(&self) -> usize { self.entries.len() }
+    pub fn is_empty(&self) -> bool { self.entries.is_empty() }
+}
+
+impl Default for FontCache {
+    fn default() -> Self { Self::new() }
 }

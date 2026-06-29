@@ -94,7 +94,6 @@ impl SovereignVault {
             hot:         Arc::new(HotCache::new(limit_bytes)),
             tracker:     MemoryTracker::new(limit_bytes),
             fonts:       Mutex::new(FontCache::new()),
-            font_engine: SovereignFontEngine::new(),
         }
     }
 

@@ -10,16 +10,16 @@ pub use gpu::GpuCanvas;
 pub mod paint;
 pub mod pixel;
 pub mod raster;
+pub mod text_render;
+use text_render::TextRenderer;
 pub mod surface;
 
 pub use paint::{Color, PaintCommand, DisplayList};
 pub use pixel::PixelBuffer;
 pub use raster::SoftwareRasterizer;
 pub use surface::{CanvasSurface, SurfaceBackend, SurfaceError};
-pub use text_render::TextRenderer;
-
+pub 
 use axon_layout::ComputedLayout;
-use text_render::TextRenderer;
 
 /// Raster backend selector
 #[derive(Debug, Clone, PartialEq)]

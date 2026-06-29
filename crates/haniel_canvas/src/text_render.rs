@@ -44,11 +44,7 @@ impl TextRenderer {
         let fg = [color.r, color.g, color.b, color.a];
         let bg = [0u8, 0, 0, 0]; // transparent background
 
-        let config = RasterConfig {
-            fg_color: fg,
-            bg_color: bg,
-            scale:    1,
-        };
+        let config = RasterConfig { fg, bg, scale: 1 };
         let raster = TextRaster::new(Font::builtin(), config);
 
         match raster.raster_line(text) {
