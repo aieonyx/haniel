@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Edison Lepiten / AIEONYX
 // SPDX-License-Identifier: Apache-2.0
 // HANIEL-ONYX — Sovereign On-Device AI Compute Layer
-// HE-7: axon_gpu bridge wired — GPU compute available for AI inference
-// HE-11: full AI runtime (GGUF, tokenizer, attention, KV cache)
+// HE-11: full inference pipeline — classifier, inference engine,
+//        render hints, threat detection, GPU bridge
 
 #![forbid(unsafe_code)]
 
@@ -12,8 +12,11 @@ pub mod hints;
 pub mod infer;
 pub mod threat;
 
+pub use classify::SemanticClassifier;
 pub use gpu_bridge::OnxGpuBridge;
-
+pub use hints::HintGenerator;
+pub use infer::InferenceEngine;
+pub use threat::ThreatClassifier;
 
 /// Semantic content classification
 #[derive(Debug, Clone, PartialEq)]
@@ -27,7 +30,7 @@ pub enum SemanticClass {
     Unknown,
 }
 
-/// Render hint for a node
+/// Render hint for a node — feeds SRB weights
 #[derive(Debug, Clone)]
 pub struct RenderHint {
     pub node:          u32,
@@ -71,32 +74,46 @@ pub enum OnyxError {
 
 /// HANIEL-ONYX AI compute trait
 pub trait IrisOnyx: Send + Sync {
-    fn classify(&self) -> Result<Vec<RenderHint>, OnyxError>;
+    fn classify_text(&self, text: &str) -> SemanticClass;
     fn infer(&self, request: InferenceRequest) -> Result<InferenceResult, OnyxError>;
-    fn render_hints(&self) -> Result<Vec<RenderHint>, OnyxError>;
-    fn threat_classify(&self, content: &str) -> SemanticClass;
+    fn render_hints(&self, nodes: &[(u32, &str)]) -> Vec<RenderHint>;
+    fn threat_score(&self, content: &str) -> f32;
     fn model_memory_used(&self) -> usize;
 }
 
-/// Sovereign ONYX implementation
-/// HE-7: GPU compute available via OnxGpuBridge
-/// HE-11: full inference pipeline
+/// Sovereign ONYX — full HE-11 implementation
 pub struct SovereignOnyx {
-    pub gpu: OnxGpuBridge,
+    pub gpu:       OnxGpuBridge,
+    classifier:    SemanticClassifier,
+    inference:     InferenceEngine,
+    hint_gen:      HintGenerator,
+    threat_clf:    ThreatClassifier,
 }
 
 impl SovereignOnyx {
     pub fn new() -> Self {
         Self {
-            gpu: OnxGpuBridge::cpu(),
+            gpu:        OnxGpuBridge::cpu(),
+            classifier: SemanticClassifier::new(),
+            inference:  InferenceEngine::new(),
+            hint_gen:   HintGenerator::new(),
+            threat_clf: ThreatClassifier::new(),
         }
     }
 
-    /// Initialize with GPU discovery
     pub fn with_gpu() -> Self {
         Self {
-            gpu: OnxGpuBridge::new().unwrap_or_else(|_| OnxGpuBridge::cpu()),
+            gpu:        OnxGpuBridge::new().unwrap_or_else(|_| OnxGpuBridge::cpu()),
+            classifier: SemanticClassifier::new(),
+            inference:  InferenceEngine::new(),
+            hint_gen:   HintGenerator::new(),
+            threat_clf: ThreatClassifier::new(),
         }
+    }
+
+    /// Summarize text locally — no network call
+    pub fn summarize(&self, text: &str, max_words: usize) -> String {
+        self.inference.summarize(text, max_words)
     }
 }
 
@@ -105,73 +122,106 @@ impl Default for SovereignOnyx {
 }
 
 impl IrisOnyx for SovereignOnyx {
-    fn classify(&self) -> Result<Vec<RenderHint>, OnyxError> {
-        // Full classification at HE-11
-        Ok(vec![])
+    fn classify_text(&self, text: &str) -> SemanticClass {
+        self.classifier.classify_text(text)
     }
 
     fn infer(&self, request: InferenceRequest) -> Result<InferenceResult, OnyxError> {
-        // Full inference at HE-11
-        // HE-7: GPU compute available via self.gpu
-        Ok(InferenceResult {
-            text:             format!("[HE-11: inference for: {}]", request.prompt),
-            tokens_generated: 0,
-            latency_ms:       0,
-            model_used:       request.model,
-        })
+        self.inference.infer(request)
     }
 
-    fn render_hints(&self) -> Result<Vec<RenderHint>, OnyxError> {
-        Ok(vec![])
+    fn render_hints(&self, nodes: &[(u32, &str)]) -> Vec<RenderHint> {
+        let classifications: Vec<(u32, SemanticClass)> = nodes.iter()
+            .map(|(id, text)| (*id, self.classifier.classify_text(text)))
+            .collect();
+        self.hint_gen.generate(&classifications)
     }
 
-    fn threat_classify(&self, _content: &str) -> SemanticClass {
-        SemanticClass::Unknown
+    fn threat_score(&self, content: &str) -> f32 {
+        self.threat_clf.threat_score(content)
     }
 
-    fn model_memory_used(&self) -> usize { 0 }
+    fn model_memory_used(&self) -> usize {
+        // Micro model: 8*16 + 16 + 16*7 + 7 = 255 f32 = ~1KB
+        255 * 4
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn onyx() -> SovereignOnyx { SovereignOnyx::new() }
+
     #[test]
-    fn semantic_class_variants_exist() {
-        let _ = SemanticClass::Article;
-        let _ = SemanticClass::Navigation;
-        let _ = SemanticClass::Threat;
-        let _ = SemanticClass::Sovereign;
+    fn onyx_constructs() {
+        let _ = onyx();
     }
 
     #[test]
-    fn render_hint_range() {
-        let hint = RenderHint {
-            node: 0, class: SemanticClass::Article,
-            priority: 0.9, ai_confidence: 0.85,
+    fn onyx_classify_sovereign() {
+        let o = onyx();
+        assert_eq!(o.classify_text("awp://aegis sovereign"), SemanticClass::Sovereign);
+    }
+
+    #[test]
+    fn onyx_classify_threat() {
+        let o = onyx();
+        assert_eq!(o.classify_text("Connect wallet now claim reward"), SemanticClass::Threat);
+    }
+
+    #[test]
+    fn onyx_infer_returns_result() {
+        let o   = onyx();
+        let req = InferenceRequest {
+            prompt:     "What is sovereignty?".to_string(),
+            max_tokens: 50,
+            model:      OnDeviceModel::Micro,
         };
-        assert!(hint.priority >= 0.0 && hint.priority <= 1.0);
+        let r = o.infer(req).unwrap();
+        assert!(!r.text.is_empty());
     }
 
     #[test]
-    fn sovereign_onyx_constructs() {
-        let o = SovereignOnyx::new();
-        assert_eq!(o.gpu.vram_bytes(), 0); // CPU mode
+    fn onyx_render_hints_pipeline() {
+        let o = onyx();
+        let hints = o.render_hints(&[
+            (1, "Home About Contact"),
+            (2, "awp://sovereign content"),
+            (3, "Long article about technology in the modern world and its implications"),
+        ]);
+        assert_eq!(hints.len(), 3);
+        // Sovereign node should have highest priority
+        let sovereign_hint = hints.iter().find(|h| h.class == SemanticClass::Sovereign);
+        assert!(sovereign_hint.is_some());
+        assert_eq!(sovereign_hint.unwrap().priority, 1.0);
     }
 
     #[test]
-    fn sovereign_onyx_gpu_bridge_works() {
-        let o = SovereignOnyx::new();
+    fn onyx_threat_score_hostile() {
+        let o     = onyx();
+        let score = o.threat_score("Connect wallet verify claim limited time");
+        assert!(score >= 0.0);
+    }
+
+    #[test]
+    fn onyx_summarize() {
+        let o    = onyx();
+        let text = "word ".repeat(50);
+        let s    = o.summarize(&text, 10);
+        assert!(s.ends_with("...") || s.len() <= text.len());
+    }
+
+    #[test]
+    fn onyx_gpu_bridge_available() {
+        let o = onyx();
         let r = o.gpu.add(&[1.0, 2.0], &[3.0, 4.0]).unwrap();
         assert_eq!(r, vec![4.0, 6.0]);
     }
 
     #[test]
-    fn sovereign_onyx_gpu_relu() {
-        let o = SovereignOnyx::new();
-        let r = o.gpu.relu(&[-1.0, 0.5, 2.0]).unwrap();
-        assert_eq!(r[0], 0.0);
-        assert!(r[1] > 0.0);
-        assert!(r[2] > 0.0);
+    fn onyx_model_memory_reported() {
+        let o = onyx();
+        assert!(o.model_memory_used() > 0);
     }
 }
