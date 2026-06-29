@@ -97,8 +97,7 @@ impl ScriptRunner {
                             node,
                             text: text.to_string(),
                         };
-                        pipeline.queue(mutation.clone(), gate)
-                            .map_err(|e| e)?;
+                        pipeline.queue(mutation.clone(), gate)?;
                         mutations.push(mutation);
                     }
                 }
@@ -114,8 +113,7 @@ impl ScriptRunner {
                             property: prop.to_string(),
                             value:    val.to_string(),
                         };
-                        pipeline.queue(mutation.clone(), gate)
-                            .map_err(|e| e)?;
+                        pipeline.queue(mutation.clone(), gate)?;
                         mutations.push(mutation);
                     }
                 }
@@ -123,8 +121,7 @@ impl ScriptRunner {
                     // remove <node_id>
                     if let Ok(node) = rest.trim().parse::<u32>() {
                         let mutation = DomMutation::RemoveNode { node };
-                        pipeline.queue(mutation.clone(), gate)
-                            .map_err(|e| e)?;
+                        pipeline.queue(mutation.clone(), gate)?;
                         mutations.push(mutation);
                     }
                 }

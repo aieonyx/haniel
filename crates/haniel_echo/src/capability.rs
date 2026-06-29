@@ -58,7 +58,7 @@ impl ArpiCapability {
     /// Time remaining in seconds
     pub fn ttl(&self) -> u64 {
         let now = Self::now();
-        if self.expires > now { self.expires - now } else { 0 }
+        self.expires.saturating_sub(now)
     }
 
     fn now() -> u64 {
