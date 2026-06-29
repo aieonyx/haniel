@@ -88,7 +88,6 @@ impl ScriptSandbox {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::capability::ArpiCapability;
 
     #[test]
     fn sandbox_sovereign_config() {

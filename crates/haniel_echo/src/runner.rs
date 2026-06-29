@@ -3,8 +3,8 @@
 // haniel_echo::runner — Script execution engine
 // Runs AxonScript and WASM via axon_wasm
 
-use axon_wasm::{WasmRuntime, WasmValue, WasmResult};
-use crate::capability::{CapabilityGate, CapScope};
+use axon_wasm::{WasmRuntime, WasmValue};
+use crate::capability::CapabilityGate;
 use crate::{ScriptSource, ScriptResult, EchoError};
 use crate::dom::{DomPipeline, DomMutation};
 
@@ -43,7 +43,8 @@ impl ScriptRunner {
             .map_err(|e| EchoError::RuntimeError(format!("WASM: {:?}", e)))?;
 
         // Execute — returns values from WASM stack
-        let results = runtime.run_export("main", &[])
+        let mut runtime = runtime;
+        let results = runtime.call_by_name("main", vec![])
             .unwrap_or_default();
 
         // Convert WASM results to capability-gated DOM mutations
@@ -80,9 +81,17 @@ impl ScriptRunner {
             let line = line.trim();
             if line.is_empty() || line.starts_with("//") { continue; }
 
-            let parts: Vec<&str> = line.splitn(4, ' ').collect();
-            match parts.as_slice() {
-                ["set_text", node_str, text] => {
+            // Parse command word first
+            let mut iter   = line.splitn(2, ' ');
+            let cmd        = iter.next().unwrap_or("");
+            let rest       = iter.next().unwrap_or("");
+
+            match cmd {
+                "set_text" => {
+                    // set_text <node_id> <text...>
+                    let mut parts = rest.splitn(2, ' ');
+                    let node_str  = parts.next().unwrap_or("");
+                    let text      = parts.next().unwrap_or("");
                     if let Ok(node) = node_str.parse::<u32>() {
                         let mutation = DomMutation::SetText {
                             node,
@@ -93,7 +102,12 @@ impl ScriptRunner {
                         mutations.push(mutation);
                     }
                 }
-                ["set_style", node_str, prop, val] => {
+                "set_style" => {
+                    // set_style <node_id> <property> <value>
+                    let mut parts = rest.splitn(3, ' ');
+                    let node_str  = parts.next().unwrap_or("");
+                    let prop      = parts.next().unwrap_or("");
+                    let val       = parts.next().unwrap_or("");
                     if let Ok(node) = node_str.parse::<u32>() {
                         let mutation = DomMutation::SetStyle {
                             node,
@@ -105,8 +119,9 @@ impl ScriptRunner {
                         mutations.push(mutation);
                     }
                 }
-                ["remove", node_str] => {
-                    if let Ok(node) = node_str.parse::<u32>() {
+                "remove" => {
+                    // remove <node_id>
+                    if let Ok(node) = rest.trim().parse::<u32>() {
                         let mutation = DomMutation::RemoveNode { node };
                         pipeline.queue(mutation.clone(), gate)
                             .map_err(|e| e)?;
@@ -148,7 +163,7 @@ impl Default for ScriptRunner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::capability::ArpiCapability;
+    use crate::capability::{ArpiCapability, CapScope};
 
     fn trusted_gate() -> CapabilityGate {
         let cap = ArpiCapability::issue(CapScope::DomWrite, "test", 3600);
