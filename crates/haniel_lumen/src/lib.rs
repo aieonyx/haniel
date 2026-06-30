@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // HANIEL LUMEN — Sovereign Media Engine
 // HE-10: axon_media wired — video frames, PCM audio, DRM sovereignty
+// HE-14: HLS/DASH manifest + segment-list parsing, AV1/codec-string negotiation
 
 #![forbid(unsafe_code)]
 
@@ -15,10 +16,11 @@ pub mod stream;
 pub mod video;
 
 pub use audio::AudioPipeline;
-pub use codec::{detect_video_codec, detect_audio_codec};
+pub use codec::{detect_video_codec, detect_audio_codec, parse_codec_string, first_video_codec, first_audio_codec, CodecToken};
+pub use demux::{Segment, SegmentList, SegmentParseError};
 pub use drm::{DrmResolver, DrmVerdict, SovereigntyNotice};
 pub use session::{MediaSession, MediaStats, SessionState, SessionIdGen};
-pub use stream::{StreamManifest, StreamQuality};
+pub use stream::{StreamManifest, StreamQuality, ManifestParseError};
 pub use abr::AbrController;
 pub use video::{SovereignVideoFrame, FrameBuffer};
 
@@ -192,8 +194,8 @@ mod tests {
     fn lumen_abr_selects_quality() {
         let l = lumen();
         let mut m = StreamManifest::new(StreamProtocol::Hls, "stream.m3u8");
-        m.add_quality(StreamQuality { bitrate_bps: 500_000, width: 854, height: 480, url: "480p".into() });
-        m.add_quality(StreamQuality { bitrate_bps: 2_000_000, width: 1280, height: 720, url: "720p".into() });
+        m.add_quality(StreamQuality { bitrate_bps: 500_000, width: 854, height: 480, url: "480p".into(), codecs: None });
+        m.add_quality(StreamQuality { bitrate_bps: 2_000_000, width: 1280, height: 720, url: "720p".into(), codecs: None });
         let q = l.select_quality(&m, 1_000_000).unwrap();
         assert_eq!(q.height, 480);
     }

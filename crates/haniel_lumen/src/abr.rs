@@ -40,9 +40,9 @@ mod tests {
 
     fn manifest() -> StreamManifest {
         let mut m = StreamManifest::new(StreamProtocol::Hls, "stream.m3u8");
-        m.add_quality(StreamQuality { bitrate_bps: 500_000,   width: 854,  height: 480,  url: "480p".into() });
-        m.add_quality(StreamQuality { bitrate_bps: 1_500_000, width: 1280, height: 720,  url: "720p".into() });
-        m.add_quality(StreamQuality { bitrate_bps: 4_000_000, width: 1920, height: 1080, url: "1080p".into() });
+        m.add_quality(StreamQuality { bitrate_bps: 500_000,   width: 854,  height: 480,  url: "480p".into(), codecs: None });
+        m.add_quality(StreamQuality { bitrate_bps: 1_500_000, width: 1280, height: 720,  url: "720p".into(), codecs: None });
+        m.add_quality(StreamQuality { bitrate_bps: 4_000_000, width: 1920, height: 1080, url: "1080p".into(), codecs: None });
         m
     }
 
