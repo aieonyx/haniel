@@ -18,7 +18,6 @@ pub use paint::{Color, PaintCommand, DisplayList};
 pub use pixel::PixelBuffer;
 pub use raster::SoftwareRasterizer;
 pub use surface::{CanvasSurface, SurfaceBackend, SurfaceError};
-pub 
 use axon_layout::ComputedLayout;
 
 /// Raster backend selector

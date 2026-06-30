@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // HANIEL — Sovereign Browser and Rendering Engine
 // Orchestrator crate — wires all 8 modules
+// HE-15a: pipeline module — the load-bearing fetch→parse→layout→paint chain
 
 #![forbid(unsafe_code)]
+
+pub mod pipeline;
 
 pub use haniel_herald as herald;
 pub use haniel_prism as prism;
@@ -13,6 +16,8 @@ pub use haniel_onyx as onyx;
 pub use haniel_vault as vault;
 pub use haniel_sentinel as sentinel;
 pub use haniel_lumen as lumen;
+
+pub use pipeline::{PageLoadError, PageLoadResult, PageLoader, PassQuality};
 
 /// HANIEL engine version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
