@@ -15,6 +15,7 @@ axon_font.workspace = true
 axon_layout.workspace = true
 wgpu = { version = "22", optional = true }
 log.workspace = true
+image = { version = "0.25", default-features = false, features = ["png"] }
 
 [features]
 default = []

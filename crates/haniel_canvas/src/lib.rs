@@ -7,6 +7,7 @@
 
 pub mod gpu;
 pub use gpu::GpuCanvas;
+pub mod codec;
 pub mod paint;
 pub mod pixel;
 pub mod raster;
@@ -14,6 +15,7 @@ pub mod text_render;
 use text_render::TextRenderer;
 pub mod surface;
 
+pub use codec::{encode_png, CodecError};
 pub use paint::{Color, PaintCommand, DisplayList};
 pub use pixel::PixelBuffer;
 pub use raster::SoftwareRasterizer;
