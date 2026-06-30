@@ -1,0 +1,17 @@
+# Copyright (c) 2026 Edison Lepiten / AIEONYX
+# SPDX-License-Identifier: Apache-2.0
+# HANIEL AWP — Sovereign AWP protocol engine + YouTube compatibility
+
+[package]
+name              = "haniel_awp"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+haniel_lumen = { path = "../haniel_lumen" }
+log.workspace = true
+
+[dev-dependencies]
+env_logger.workspace = true

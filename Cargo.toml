@@ -14,6 +14,7 @@ members = [
     "crates/haniel_vault",
     "crates/haniel_sentinel",
     "crates/haniel_lumen",
+    "crates/haniel_awp",
     "crates/haniel",
 ]
 
